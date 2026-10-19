@@ -1,0 +1,20 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    # Проброс конфига: физический файл в папке prometheus/
+    # попадает внутрь контейнера по пути, который ожидает Prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    # Официальный образ ждёт конфиг по умолчанию именно там,
+    # поэтому command можно не переопределять
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
