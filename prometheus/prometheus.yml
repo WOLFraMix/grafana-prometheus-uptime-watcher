@@ -13,3 +13,8 @@ scrape_configs:
     # это идеальный первый таргет, чтобы проверить связку
     static_configs:
       - targets: ["prometheus:9090"]
+
+  # наш watcher: имя сервиса из compose, порт, который слушает КОНТЕЙНЕР
+  - job_name: "watcher"
+    static_configs:
+      - targets: ["app:8080"]
