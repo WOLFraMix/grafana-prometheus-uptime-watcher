@@ -1,11 +1,14 @@
 services:
-# наше приложение: собирается из локального Dockerfile
+  # наше приложение: собирается из локального Dockerfile
   app:
     build: .
     ports:
       - "8080:8080"
     restart: unless-stopped
-    
+    environment:
+      TARGETS: "https://example.com,https://go.dev,https://stepik.org/learn"
+      CHECK_INTERVAL: "10s"
+
   prometheus:
     image: prom/prometheus:v2.53.0
     # Проброс конфига: физический файл в папке prometheus/
