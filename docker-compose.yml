@@ -15,6 +15,7 @@ services:
     # попадает внутрь контейнера по пути, который ожидает Prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
     # Официальный образ ждёт конфиг по умолчанию именно там,
     # поэтому command можно не переопределять
     ports:
@@ -28,3 +29,11 @@ services:
     restart: unless-stopped
     depends_on:
       - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+# Именованные тома: живут вне контейнеров,
+# переживают down/up, пересоздание и пересборку
+volumes:
+  prometheus-data:
+  grafana-data:

@@ -1,7 +1,9 @@
 package config
 
 import (
+	"errors"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -40,7 +42,12 @@ func New() Config {
 	urls := strings.Split(raw, ",")
 	targets := []string{}
 	for _, u := range urls {
-		targets = append(targets, strings.TrimSpace(u))
+		u = strings.TrimSpace(u)
+		err := validateURL(u)
+		if err != nil {
+			log.Fatalf("invalid target %q: %v", u, err)
+		}
+		targets = append(targets, u)
 	}
 
 	return Config{
@@ -48,4 +55,19 @@ func New() Config {
 		CheckInterval: d,
 		Targets:       targets,
 	}
+}
+
+// validateURL проверяет, что строка — корректный HTTP(S)-адрес.
+func validateURL(raw string) error {
+	u, err := url.Parse(raw) // функция из пакета net/url
+	if err != nil {
+		return err
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return errors.New("invalid Scheme")
+	}
+	if u.Host == "" {
+		return errors.New("invalid Host")
+	}
+	return nil
 }
