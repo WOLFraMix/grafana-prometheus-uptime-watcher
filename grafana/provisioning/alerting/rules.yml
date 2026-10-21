@@ -1,0 +1,42 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: every-1m
+    folder: uptime-watcher
+    interval: 1m
+    rules:
+      - uid: high-failure-rate
+        title: High failure rate
+        condition: C
+        for: 1m
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: Таргет выдаёт растущее число провалов проверок
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: increase(watcher_checks_total{outcome="failure"}[5m])
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [5]
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
