@@ -1,7 +1,9 @@
 package config
 
 import (
+	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -20,18 +22,30 @@ func New() Config {
 	if port == "" {
 		port = ":8080"
 	}
-	return Config{
-		Port: port,
+
+	raw := os.Getenv("CHECK_INTERVAL")
+	if raw == "" {
+		raw = "15s"
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil {
+		log.Println("invalid CHECK_INTERVAL, using default 15s:", err)
+		d = 15 * time.Second
 	}
 
-	// 2. CheckInterval:
-	//    raw := os.Getenv("CHECK_INTERVAL"); если пусто — дефолт "15s"
-	//    d, err := time.ParseDuration(raw)
-	//    если err (кто-то написал "abc") — вернуть дефолт 15 секунд:
-	//    падать из-за кривой опции не стоит, просто логируем и используем дефолт
+	raw = os.Getenv("TARGETS")
+	if raw == "" {
+		log.Fatal("empty urls")
+	}
+	urls := strings.Split(raw, ",")
+	targets := []string{}
+	for _, u := range urls {
+		targets = append(targets, strings.TrimSpace(u))
+	}
 
-	// 3. Targets:
-	//    raw := os.Getenv("TARGETS"); если пусто — пустой срез []string{}
-	//    strings.Split(raw, ",") — но каждый элемент подрезать strings.TrimSpace:
-	//    "https://a.com, https://b.com" с пробелом после запятой не должно ломать парсинг
+	return Config{
+		Port:          port,
+		CheckInterval: d,
+		Targets:       targets,
+	}
 }

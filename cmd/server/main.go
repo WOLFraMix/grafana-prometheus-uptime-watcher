@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/WOLFraMix/grafana-prometheus-uptime-watcher/internal/checker"
 	"github.com/WOLFraMix/grafana-prometheus-uptime-watcher/internal/config"
 	"github.com/WOLFraMix/grafana-prometheus-uptime-watcher/internal/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -13,6 +14,9 @@ func main() {
 	cfg := config.New()
 
 	metrics.Init()
+
+	c := checker.New(cfg.Targets, cfg.CheckInterval)
+	go c.Run()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
